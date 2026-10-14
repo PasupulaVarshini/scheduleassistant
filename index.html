@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Agentic RAG Schedule Assistant | 30-Day AI Calendar & Vector DB</title>
+  <meta name="description" content="Autonomous Agentic RAG-based Schedule Assistant powered by ChromaDB vector search and dynamic tool calling.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body class="dark-theme">
+  <div class="app-container">
+    <!-- Top Navigation Header -->
+    <header class="app-header">
+      <div class="header-left">
+        <div class="logo-badge">
+          <div class="logo-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="4" width="18" height="18" rx="3" ry="3"></rect>
+              <line x1="16" y1="2" x2="16" y2="6"></line>
+              <line x1="8" y1="2" x2="8" y2="6"></line>
+              <line x1="3" y1="10" x2="21" y2="10"></line>
+              <path d="m9 16 2 2 4-4"></path>
+            </svg>
+          </div>
+          <div class="logo-text">
+            <h1>ChronosAI <span class="tag-gradient">Agentic RAG</span></h1>
+            <p class="subtitle">30-Day Autonomous Schedule Assistant</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="header-center">
+        <div class="metric-pill">
+          <span class="pulse-indicator"></span>
+          <span class="metric-label">Vector Store:</span>
+          <strong id="vectorStatus">ChromaDB (Active)</strong>
+        </div>
+        <div class="metric-pill">
+          <span class="metric-icon">📅</span>
+          <span class="metric-label">Scope:</span>
+          <strong id="scheduleScope">Next 30 Days</strong>
+        </div>
+      </div>
+
+      <div class="header-right">
+        <button id="btnResetData" class="btn btn-secondary btn-sm" title="Reset pristine 30-day sample data">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg>
+          Reset 30-Day Data
+        </button>
+        <button id="btnOpenAddModal" class="btn btn-primary btn-sm">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+          New Event
+        </button>
+      </div>
+    </header>
+
+    <!-- Stat Bar Summary -->
+    <section class="stats-ribbon">
+      <div class="stat-card stat-total">
+        <div class="stat-num" id="statTotal">--</div>
+        <div class="stat-name">Total Events</div>
+      </div>
+      <div class="stat-card stat-meeting">
+        <div class="stat-num" id="statMeetings">--</div>
+        <div class="stat-name">💼 Meetings</div>
+      </div>
+      <div class="stat-card stat-workshop">
+        <div class="stat-num" id="statWorkshops">--</div>
+        <div class="stat-name">🛠️ Workshops</div>
+      </div>
+      <div class="stat-card stat-task">
+        <div class="stat-num" id="statTasks">--</div>
+        <div class="stat-name">📝 Tasks</div>
+      </div>
+      <div class="stat-card stat-appointment">
+        <div class="stat-num" id="statAppointments">--</div>
+        <div class="stat-name">🩺 Appointments</div>
+      </div>
+    </section>
+
+    <!-- Main Workspace Split -->
+    <main class="main-layout">
+      <!-- LEFT COLUMN: AGENT CHAT & REASONING INSPECTOR -->
+      <section class="chat-section">
+        <div class="section-header">
+          <div class="section-title">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            <h2>Agent Reasoning & Chat Studio</h2>
+          </div>
+          <div class="tool-badges">
+            <span class="tool-tag" title="Tool 1: Vector Search + Temporal Retrieval">🔧 get_schedule</span>
+            <span class="tool-tag" title="Tool 2: Add, Reschedule, or Delete Events">⚡ update_schedule</span>
+          </div>
+        </div>
+
+        <!-- Sample Query Prompt Chips -->
+        <div class="query-chips-bar">
+          <span class="chips-label">Quick Prompts:</span>
+          <button class="chip-btn" data-query="What do I have scheduled tomorrow?">
+            “What do I have scheduled tomorrow?”
+          </button>
+          <button class="chip-btn" data-query="Am I free Friday afternoon?">
+            “Am I free Friday afternoon?”
+          </button>
+          <button class="chip-btn" data-query="Add a meeting on August 15 at 3 PM.">
+            “Add a meeting on August 15 at 3 PM”
+          </button>
+          <button class="chip-btn" data-query="Move my meeting from 2 PM to 4 PM.">
+            “Move my meeting from 2 PM to 4 PM”
+          </button>
+          <button class="chip-btn" data-query="What workshops do I have this month?">
+            “What workshops do I have?”
+          </button>
+        </div>
+
+        <!-- Message Feed -->
+        <div class="chat-feed" id="chatFeed">
+          <!-- Initial Welcome Message from Agent -->
+          <div class="message-row agent-row">
+            <div class="avatar agent-avatar">🤖</div>
+            <div class="message-content">
+              <div class="message-meta">
+                <span class="author-name">ChronosAI Agent</span>
+                <span class="timestamp">Just now</span>
+              </div>
+              <div class="bubble agent-bubble">
+                <p>Hello! I am your <strong>Agentic RAG Schedule Assistant</strong> managing your calendar across the next 30 days.</p>
+                <p>I autonomously use two specialized tools:</p>
+                <ul>
+                  <li><code>get_schedule</code>: Queries ChromaDB vector database with semantic retrieval and checks open time slots.</li>
+                  <li><code>update_schedule</code>: Adds, updates, reschedules, or removes events while keeping vector embeddings synchronized.</li>
+                </ul>
+                <p>Try clicking any quick prompt chip above, or ask me naturally about your meetings, workshops, tasks, and appointments!</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Agent Execution Trace Inspector Drawer -->
+        <div class="trace-panel collapsed" id="tracePanel">
+          <div class="trace-header" id="traceHeaderToggle">
+            <div class="trace-title">
+              <span class="trace-icon">⚡</span>
+              <span>Agentic Execution Trace & RAG Inspector</span>
+              <span class="trace-badge" id="traceToolBadge">Ready</span>
+            </div>
+            <button class="trace-toggle-btn" id="traceToggleBtn" aria-label="Toggle Trace Details">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"></polyline></svg>
+            </button>
+          </div>
+          <div class="trace-body" id="traceBody">
+            <div class="trace-step">
+              <div class="trace-step-label">💭 Thought & Intent:</div>
+              <div class="trace-step-val" id="traceThought">Awaiting user input...</div>
+            </div>
+            <div class="trace-step">
+              <div class="trace-step-label">🛠️ Selected Tool:</div>
+              <div class="trace-step-val" id="traceTool">-</div>
+            </div>
+            <div class="trace-step">
+              <div class="trace-step-label">📦 Tool Arguments:</div>
+              <pre class="trace-code" id="traceArgs">{}</pre>
+            </div>
+            <div class="trace-step">
+              <div class="trace-step-label">🔍 ChromaDB RAG Vector Context:</div>
+              <div class="trace-rag-snippets" id="traceRAG">No vector queries executed yet.</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Chat Input Bar -->
+        <div class="chat-input-wrapper">
+          <form id="chatForm" class="chat-form">
+            <input 
+              type="text" 
+              id="chatInput" 
+              placeholder="Ask about your schedule, add events, or reschedule (e.g. 'What do I have scheduled tomorrow?')..." 
+              autocomplete="off" 
+              required
+            />
+            <button type="submit" id="btnSendChat" class="btn btn-primary btn-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+            </button>
+          </form>
+        </div>
+      </section>
+
+      <!-- RIGHT COLUMN: 30-DAY TIMELINE & CALENDAR -->
+      <section class="schedule-section">
+        <div class="section-header">
+          <div class="section-title">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+            <h2>30-Day Schedule Explorer</h2>
+          </div>
+          <div class="search-box">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            <input type="text" id="scheduleFilterInput" placeholder="Filter title, topic, or person..." />
+          </div>
+        </div>
+
+        <!-- Filter Category Tabs -->
+        <div class="category-tabs">
+          <button class="cat-tab active" data-category="all">All (<span id="countAll">0</span>)</button>
+          <button class="cat-tab" data-category="meeting">💼 Meetings (<span id="countMeeting">0</span>)</button>
+          <button class="cat-tab" data-category="workshop">🛠️ Workshops (<span id="countWorkshop">0</span>)</button>
+          <button class="cat-tab" data-category="task">📝 Tasks (<span id="countTask">0</span>)</button>
+          <button class="cat-tab" data-category="appointment">🩺 Appointments (<span id="countAppointment">0</span>)</button>
+        </div>
+
+        <!-- Events List Feed -->
+        <div class="timeline-container" id="timelineContainer">
+          <div class="loading-state">
+            <div class="spinner"></div>
+            <p>Loading 30-day schedule from vector store...</p>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Modal for Adding / Editing Events Directly -->
+    <div class="modal-backdrop" id="eventModal" style="display: none;">
+      <div class="modal-card">
+        <div class="modal-header">
+          <h3 id="modalTitle">Schedule New Event</h3>
+          <button class="btn-close" id="btnCloseModal">&times;</button>
+        </div>
+        <form id="eventForm" class="modal-form">
+          <input type="hidden" id="formEventId" value="">
+          <div class="form-group">
+            <label for="formTitle">Event Title *</label>
+            <input type="text" id="formTitle" required placeholder="e.g. AI Strategy Sync or Dentist Exam">
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="formCategory">Category *</label>
+              <select id="formCategory" required>
+                <option value="meeting">💼 Meeting</option>
+                <option value="workshop">🛠️ Workshop</option>
+                <option value="task">📝 Task</option>
+                <option value="appointment">🩺 Appointment</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="formDate">Date (YYYY-MM-DD) *</label>
+              <input type="date" id="formDate" required>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="formStartTime">Start Time (HH:MM) *</label>
+              <input type="time" id="formStartTime" required value="09:00">
+            </div>
+            <div class="form-group">
+              <label for="formEndTime">End Time (HH:MM) *</label>
+              <input type="time" id="formEndTime" required value="10:00">
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="formLocation">Location / Virtual Room</label>
+            <input type="text" id="formLocation" placeholder="e.g. Zoom Room 3 or City Clinic">
+          </div>
+          <div class="form-group">
+            <label for="formParticipants">Participants (comma separated)</label>
+            <input type="text" id="formParticipants" placeholder="e.g. Alice, Bob, Dr. Evans">
+          </div>
+          <div class="form-group">
+            <label for="formDescription">Description & Notes (Stored in Vector DB)</label>
+            <textarea id="formDescription" rows="3" placeholder="Provide background, agenda, or context for semantic retrieval"></textarea>
+          </div>
+          <div class="modal-actions">
+            <button type="button" class="btn btn-secondary" id="btnCancelModal">Cancel</button>
+            <button type="submit" class="btn btn-primary" id="btnSaveEvent">Save & Index in ChromaDB</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
